@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2021 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2010-2023 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the Apache License 2.0 (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -19,6 +19,8 @@
 #include "internal/cryptlib.h"
 #include <openssl/cmac.h>
 #include <openssl/err.h>
+
+#define MIN_MALLOC_BL_NUM   4
 
 struct CMAC_CTX_st {
     /* Cipher context to use */
@@ -188,11 +190,34 @@ int CMAC_Update(CMAC_CTX *ctx, const void *in, size_t dlen)
             return 0;
     }
     /* Encrypt all but one of the complete blocks left */
-    while (dlen > (size_t)bl) {
-        if (EVP_Cipher(ctx->cctx, ctx->tbl, data, bl) <= 0)
+    unsigned char *buf = NULL;
+    size_t malloc_len = 0;
+    /*
+     * If dlen is greater than MIN_MALLOC_BL_NUM * bl, malloc
+     * a temporary buf used as cipher output, and cipher all but
+     * one of the complete blocks at once.
+     */
+    if (dlen > (size_t)bl * MIN_MALLOC_BL_NUM) {
+        malloc_len = ((dlen - 1) / bl) * bl;
+        buf = OPENSSL_malloc(malloc_len);
+    }
+
+    if (buf != NULL) {
+        if (EVP_Cipher(ctx->cctx, buf, data, malloc_len) <= 0) {
+            OPENSSL_free(buf);
             return 0;
-        dlen -= bl;
-        data += bl;
+        }
+        dlen -= malloc_len;
+        data += malloc_len;
+        memcpy(ctx->tbl, &buf[malloc_len - bl], bl);
+        OPENSSL_free(buf);
+    } else {
+        while (dlen > (size_t)bl) {
+            if (EVP_Cipher(ctx->cctx, ctx->tbl, data, bl) <= 0)
+                return 0;
+            dlen -= bl;
+            data += bl;
+        }
     }
     /* Copy any data left to last block buffer */
     memcpy(ctx->last_block, data, dlen);
