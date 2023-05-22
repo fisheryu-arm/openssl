@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2020 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2023 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the Apache License 2.0 (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -34,10 +34,10 @@ static const char xtskey[32] = {
 static struct test_st {
     const char key[32];
     int key_len;
-    const unsigned char data[64];
+    const unsigned char data[256];
     int data_len;
     const char *mac;
-} test[3] = {
+} test[8] = {
     {
         {
             0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
@@ -69,6 +69,79 @@ static struct test_st {
         "My test data again",
         18,
         "65c11c75ecf590badd0a5e56cbb8af60"
+    },
+    // for aes-128-cbc
+    {
+        {
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+            0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+        },
+        16,
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#",
+        256,
+        "b51d35c69cf0eff2c5215edcd1775a17"
+    },
+    // for aes-192-cbc
+    {
+        {
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+            0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+            0x16, 0x17
+        },
+        24,
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#",
+        256,
+        "4dbed7ddc736b396546a7ce4f6a1c962"
+    },
+    // for aes-256-cbc
+    {
+        {
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+            0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+            0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
+        },
+        32,
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#",
+        256,
+        "753073c8b2f943a45470497f5e9c041f"
+    },
+    // for des-ede3-cbc
+    {
+        {
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+            0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+            0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
+        },
+        24,
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#",
+        256,
+        "7936fc32f9d927de"
+    },
+    // for sm4-cbc
+    {
+        {
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+            0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+        },
+        16,
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#"
+        "#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#",
+        256,
+        "0fedef9e09033eae4231629f860dc697"
     },
 };
 
@@ -157,6 +230,52 @@ static int test_cmac_run(void)
         goto err;
     p = pt(buf, len);
     if (!TEST_str_eq(p, test[2].mac))
+        goto err;
+
+    /* Test data length is greater than 1 block length */
+    if (!TEST_true(CMAC_Init(ctx, test[3].key, test[3].key_len,
+                             EVP_aes_128_cbc(), NULL))
+        || !TEST_true(CMAC_Update(ctx, test[3].data, test[3].data_len))
+        || !TEST_true(CMAC_Final(ctx, buf, &len)))
+        goto err;
+    p = pt(buf, len);
+    if (!TEST_str_eq(p, test[3].mac))
+        goto err;
+
+    if (!TEST_true(CMAC_Init(ctx, test[4].key, test[4].key_len,
+                             EVP_aes_192_cbc(), NULL))
+        || !TEST_true(CMAC_Update(ctx, test[4].data, test[4].data_len))
+        || !TEST_true(CMAC_Final(ctx, buf, &len)))
+        goto err;
+    p = pt(buf, len);
+    if (!TEST_str_eq(p, test[4].mac))
+        goto err;
+
+    if (!TEST_true(CMAC_Init(ctx, test[5].key, test[5].key_len,
+                             EVP_aes_256_cbc(), NULL))
+        || !TEST_true(CMAC_Update(ctx, test[5].data, test[5].data_len))
+        || !TEST_true(CMAC_Final(ctx, buf, &len)))
+        goto err;
+    p = pt(buf, len);
+    if (!TEST_str_eq(p, test[5].mac))
+        goto err;
+
+    if (!TEST_true(CMAC_Init(ctx, test[6].key, test[6].key_len,
+                             EVP_des_ede3_cbc(), NULL))
+        || !TEST_true(CMAC_Update(ctx, test[6].data, test[6].data_len))
+        || !TEST_true(CMAC_Final(ctx, buf, &len)))
+        goto err;
+    p = pt(buf, len);
+    if (!TEST_str_eq(p, test[6].mac))
+        goto err;
+
+    if (!TEST_true(CMAC_Init(ctx, test[7].key, test[7].key_len,
+                             EVP_sm4_cbc(), NULL))
+        || !TEST_true(CMAC_Update(ctx, test[7].data, test[7].data_len))
+        || !TEST_true(CMAC_Final(ctx, buf, &len)))
+        goto err;
+    p = pt(buf, len);
+    if (!TEST_str_eq(p, test[7].mac))
         goto err;
 
     ret = 1;
